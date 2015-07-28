@@ -4,24 +4,24 @@
 typedef double gtfloat;
 
  /* points this far apart are considered "the same" */
-#define GT_ALMOST_ZERO (scgfloat)0.0000005
+#define GT_ALMOST_ZERO (gtfloat)0.0000005
 
 /* This is a really big number, but still something logical */
 /* If you are bigger than this value I'll think something is wrong */
-#define GT_LARGE_VALUE (scgfloat)999999999999.9
-#define GT_UNREASONABLY_LARGE_VALUE (scgfloat) 99999999999999999999999999.99
+#define GT_LARGE_VALUE (gtfloat)999999999999.9
+#define GT_UNREASONABLY_LARGE_VALUE (gtfloat) 99999999999999999999999999.99
  /* This is a completely reasonable value! */
-#define GT_REASONABLE_VALUE (scgfloat)1.0
+#define GT_REASONABLE_VALUE (gtfloat)1.0
 
  /* blah blah whatever. */
-#define GT_EXACTLY_ONE (scgfloat)1.0
-#define GT_EXACTLY_ZERO (scgfloat)0.0
+#define GT_EXACTLY_ONE (gtfloat)1.0
+#define GT_EXACTLY_ZERO (gtfloat)0.0
 
 #define GT_ALMOST_EQUAL3(A,B,DELTA) ( -DELTA < A-B && A-B < DELTA )
 #define GT_ALMOST_EQUAL2(A,B) ( -GT_ALMOST_ZERO < A-B && A-B < GT_ALMOST_ZERO )
 
 #ifndef M_PI
- #define M_PI (scgfloat)3.141592653589793238462643383279502884197169399375105820974944592
+ #define M_PI (gtfloat)3.141592653589793238462643383279502884197169399375105820974944592
 #endif
 
 /* TODO: are while loops in #define statments bad? I think they might be. */
