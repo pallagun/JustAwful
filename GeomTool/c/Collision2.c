@@ -1053,6 +1053,25 @@ bool Collision2_LA(Collision2Container * cont, const Line2 * const A, const Arc2
   Collision2Cont_clear(cont); 	/* public function, clear the container before you use this. */
   return Internal_LA(cont, A, B, includeEndPoints, includeEndToEndPoints, false, false, NULL, NULL);
 }
+bool Collision2_SL(Collision2Container * cont, const Segment2 * const A, const Line2 * const B, bool includeEndPoints, bool includeEndToEndPoints)
+{
+  assert(A != NULL);
+  assert(B != NULL);
+  GT_COLLISION2_VALID_ENDPOINT_INSTRUCTION(includeEndPoints, includeEndToEndPoints);
+  GT_COLLISION2CONT_VALID(cont);
+  assert(A->type == LINE || A->type == ARC);
+
+  Collision2Cont_clear(cont); 	/* public function, clear the container before you use this. */
+  
+  if (A->type == LINE)
+    { /* LINE LINE */
+      return Internal_LL(cont, &(A->s.line), B, includeEndPoints, includeEndToEndPoints, false, false, A, NULL);
+    }
+  else
+    { /* ARC LINE -> flip to be LINE ARC */
+      return Internal_LA(cont, B, &(A->s.arc) , includeEndPoints, includeEndToEndPoints, false, true , NULL, A); 
+    }
+}
 bool Collision2_SS(Collision2Container * cont, const Segment2 * const A, const Segment2 * const B, bool includeEndPoints, bool includeEndToEndPoints)
 {
   assert(A != NULL);
@@ -1077,7 +1096,6 @@ bool Collision2_SS(Collision2Container * cont, const Segment2 * const A, const S
       else                 /* ARC ARC */
 	return Internal_AA(cont, &(A->s.arc) , &(B->s.arc) , includeEndPoints, includeEndToEndPoints, false, false, A, B);      
     }
-
 }
 bool Collision2_SLL(Collision2Container * cont, const SegmentList2 * const A, const Line2 * const B, bool includeEndPoints, bool includeEndToEndPoints)
 {

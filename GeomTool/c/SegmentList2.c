@@ -180,6 +180,7 @@ bool SegmentList2_db_validateCache(const SegmentList2 * const list)
   bool result = true;
   if (list->private_cacheValid)
     {
+      
       temp = SegmentList2_create();
       SegmentList2_clone(list, temp);
       
@@ -194,7 +195,7 @@ bool SegmentList2_db_validateCache(const SegmentList2 * const list)
       result &= list->private_isZeroArea == temp->private_isZeroArea;
       assert(result);
 
-      if (temp->private_type != NULL_SET && temp->private_type != PATH)
+      if (numSegs(list) > 0 && temp->private_type != NULL_SET && temp->private_type != PATH)
 	result &= Range2_almostEqual2(&(list->private_pathBounds), &(temp->private_pathBounds));
 
       assert(result);
@@ -360,7 +361,7 @@ void SegmentList2_clone(const SegmentList2 * const source, SegmentList2 * dest)
   dest->private_cacheValid = source->private_cacheValid;
   dest->private_type = source->private_type;
 
-  /* GT_SEGLIST_VALID1(source); */
+  /* GT_SEGLIST_VALID1(source); -- can't call this here, recursion*/
   /* GT_SEGLIST_VALID1(dest); */
 }
 /* elementwise operations. */
@@ -394,7 +395,7 @@ void SegmentList2_removeRange(SegmentList2 * list, const unsigned int startIdx, 
 }
 void SegmentList2_pop(SegmentList2 * list, const bool refreshCache)
 {
-  GT_SEGLIST_VALID1(list);
+  /* GT_SEGLIST_VALID1(list); -- can't call this here, recursion */
   assert(refreshCache == true || refreshCache == false);
 
   if (numSegs(list) > 0)
@@ -907,7 +908,7 @@ bool Internal_calcSpin3(const SegmentList2 * const segs, const Range2 * const tr
   Line2 testLine;
   Vec2 segDir;
   Collision2Container * cont;
-  unsigned int i;
+  unsigned int i,j;
   short output;
 
 #ifndef NDEBUG
@@ -919,47 +920,86 @@ bool Internal_calcSpin3(const SegmentList2 * const segs, const Range2 * const tr
   assert(trustedRange != NULL);
   assert(spin != NULL);
 
+  /* shoot a line from left to right at middle y level */
   midY = Range1_mid(&(trustedRange->y));
   Line2_set5(&testLine, trustedRange->x.Min-GT_REASONABLE_VALUE, midY, trustedRange->x.Max+GT_REASONABLE_VALUE, midY);
-
   cont = Collision2Cont_create();
-  if (!Collision2_SLL(cont, segs, &testLine, true, true))
-    {
-      Collision2Cont_destroy(cont);
-      *spin = 0;
-      return (false);
-    }
-  Collision2Cont_decomposeSegsToPoints(cont); 
- 
   output = 0;
   lowestParametric = GT_EXACTLY_ONE * 2;
 
-  for (i = 0; i < cont->numPts; ++i)
-    {				/* at this point, figure out if the segment from segs is going "up" or "down" */
-      assert(cont->pts[i].aSegment->type == LINE || cont->pts[i].aSegment->type == ARC);
-
-      if (cont->pts[i].bParametric > lowestParametric)
-	continue; 		/* nope, don't care about this one. */
-
-      Seg2p_parametricDirection(cont->pts[i].aSegment, cont->pts[i].aParametric, &segDir);
+  /* this is the way to di it without referencing segmentlist level collisions */
+  {
+    for (j = 0; j < numSegs(segs); ++j)
+      {
+	if (Collision2_SL(cont, &seg(segs,j), &testLine, true,true))
+	  {
+	    Collision2Cont_decomposeSegsToPoints(cont);
+	    for (i = 0; i < cont->numPts; ++i)
+	      {
+		assert(cont->pts[i].aSegment->type == LINE || cont->pts[i].aSegment->type == ARC);
+		
+		if (cont->pts[i].bParametric > lowestParametric)
+		  continue; 		/* nope, don't care about this one. */
+	    
+		Seg2p_parametricDirection(cont->pts[i].aSegment, cont->pts[i].aParametric, &segDir);
+	    
+		if (cont->pts[i].bParametric < lowestParametric)
+		  {
+		    lowestParametric = cont->pts[i].bParametric;
+		    output = ( (segDir.y <= 0) ? ( 1 ) : ( -1 ) );
+		  }
+		else if (cont->pts[i].bParametric == lowestParametric)
+		  {
+		    if (segDir.y <= 0 && output == 1)
+		      output = 1;
+		    else if (segDir.y > 0 && output == -1)
+		      output = -1;
+		    else
+		      output = 0; 	/* two at the same point, going different directions? uhg... no. */
+		  }
+	      }
+	  }
+      }
+  }
+  /* this is the way to do it and reference collision2 */
+  /* { */
+  /*   if (!Collision2_SLL(cont, segs, &testLine, true, true)) */
+  /*     { */
+  /* 	Collision2Cont_destroy(cont); */
+  /* 	*spin = 0; */
+  /* 	return (false); */
+  /*     } */
+  /*   Collision2Cont_decomposeSegsToPoints(cont);  */
+    
+    
+  /*   for (i = 0; i < cont->numPts; ++i) */
+  /*   {				/\* at this point, figure out if the segment from segs is going "up" or "down" *\/ */
+  /*     assert(cont->pts[i].aSegment->type == LINE || cont->pts[i].aSegment->type == ARC); */
       
-      if (cont->pts[i].bParametric < lowestParametric)
-	{
-	  lowestParametric = cont->pts[i].bParametric;
-	  output = ( (segDir.y <= 0) ? ( 1 ) : ( -1 ) );
-	}
-      else if (cont->pts[i].bParametric == lowestParametric)
-	{
-	  if (segDir.y <= 0 && output == 1)
-	    output = 1;
-	  else if (segDir.y > 0 && output == -1)
-	    output = -1;
-	  else
-	    output = 0; 	/* two at the same point, going different directions? uhg... no. */
-	}
-    }
+  /*     if (cont->pts[i].bParametric > lowestParametric) */
+  /* 	continue; 		/\* nope, don't care about this one. *\/ */
+      
+  /*     Seg2p_parametricDirection(cont->pts[i].aSegment, cont->pts[i].aParametric, &segDir); */
+      
+  /*     if (cont->pts[i].bParametric < lowestParametric) */
+  /* 	{ */
+  /* 	  lowestParametric = cont->pts[i].bParametric; */
+  /* 	  output = ( (segDir.y <= 0) ? ( 1 ) : ( -1 ) ); */
+  /* 	} */
+  /*     else if (cont->pts[i].bParametric == lowestParametric) */
+  /* 	{ */
+  /* 	  if (segDir.y <= 0 && output == 1) */
+  /* 	    output = 1; */
+  /* 	  else if (segDir.y > 0 && output == -1) */
+  /* 	    output = -1; */
+  /* 	  else */
+  /* 	    output = 0; 	/\* two at the same point, going different directions? uhg... no. *\/ */
+  /* 	} */
+  /*   } */
+  /* } */
   Collision2Cont_destroy(cont);
   *spin = output;
+
   return (true);
 }
 bool SegmentList2_calcSpin(const SegmentList2 * const list, short * spin)

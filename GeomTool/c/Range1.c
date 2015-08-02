@@ -41,8 +41,8 @@ void Range1_translate(Range1 * range, const gtfloat delta)
 }
 void Range1_encompass(Range1 * accumulator, const Range1 * const addition)
 {
-  GT_RANGE1P_VALID(accumulator);
-  GT_RANGE1P_VALID(addition);
+  assert(accumulator != NULL);	/* this one can be invalid */
+  GT_RANGE1P_VALID(addition);	/* this one can't */
 
   if (accumulator->Max < addition->Max)
     accumulator->Max = addition->Max;

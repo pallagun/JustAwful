@@ -31,16 +31,24 @@ typedef double gtfloat;
 #define deg2rad(val) (val)*M_PI/180.0
 #define rad2deg(val) (val)*180.0/M_PI
 #define sign(val) (((val) >= 0) ? (1) : (-1))
-  
-#ifdef NDEBUG
- #define DB_PRINTF (void(0))
- #define DB_RUN (void(0))
-#else
- #include <stdio.h>
- #define DB_PRINTF(STUFF) printf STUFF;
- #define DB_RUN(STUFF) STUFF
+
+
+#ifndef DB_PRINTF
+ #ifdef NDEBUG
+  #define DB_PRINTF (void(0))
+ #else
+  #include <stdio.h>
+  #define DB_PRINTF(STUFF) printf STUFF
+ #endif
 #endif
 
+#ifndef DB_RUN
+ #ifdef NDEBUG
+  #define DB_RUN (void(0))
+ #else
+  #define DB_RUN(STUFF) STUFF
+ #endif
+#endif
 
 #endif
 

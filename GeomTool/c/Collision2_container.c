@@ -15,7 +15,7 @@ unsigned long Collision2Cont_resize_count;
    {
    const Segment2 * aSegment;
    const Segment2 * bSegment;
-   scgfloat aParametric, bParametric;
+   gtfloat aParametric, bParametric;
    Point2 pt;
    } Point2IntersectInfo;
 

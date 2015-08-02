@@ -64,6 +64,7 @@ bool Collision2_RR(Collision2Container * cont, const Range2 * const A, const Ran
 bool Collision2_LL(Collision2Container * cont, const Line2 * const A, const Line2 * const B, bool includeEndPoints, bool includeEndToEndPoints);
 bool Collision2_LA(Collision2Container * cont, const Line2 * const A, const Arc2 * const B, bool includeEndPoints, bool includeEndToEndPoints);
 bool Collision2_AA(Collision2Container * cont, const Arc2 * const A, const Arc2 * const B, bool includeEndPoints, bool includeEndToEndPoints);
+bool Collision2_SL(Collision2Container * cont, const Segment2 * const A, const Line2 * const B, bool includeEndPoints, bool includeEndToEndPoints);
 bool Collision2_SS(Collision2Container * cont, const Segment2 * const A, const Segment2 * const B, bool includeEndPoints, bool includeEndToEndPoints);
 bool Collision2_SLL(Collision2Container * cont, const SegmentList2 * const A, const Line2 * const B, bool includeEndPoints, bool includeEndToEndPoints);
 bool Collision2_SLS(Collision2Container * cont, const SegmentList2 * const A, const Segment2 * const B, bool includeEndPoints, bool includeEndToEndPoints);

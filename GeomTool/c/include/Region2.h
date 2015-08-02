@@ -44,6 +44,7 @@ void              Region2_insertCopy(Region2 * set, const SegmentList2 * const l
 void              Region2_appendCopy(Region2 * set, const SegmentList2 * const list);
 unsigned int      Region2_appendEmpty(Region2 * set);
 SegmentList2 *    Region2_appendEmptyP(Region2 * set);
+SegmentList2 *    SegmentList2Set_appendEmptyP(SegmentList2Set * set);
 void              Region2_appendCopySet(Region2 * list, const SegmentList2Set * const otherList);
 #define           Region2_numLists(REGION) ((REGION)->lists.numItems)
 #define           Region2_list(REGION, IDX) (((SegmentList2 *)((REGION)->lists.item))[(IDX)])

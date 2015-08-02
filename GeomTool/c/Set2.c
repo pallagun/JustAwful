@@ -91,7 +91,7 @@ void Set2_initialize(Set2 * set)
 void Set2_initialize2(Set2 * set, const unsigned int containerSize)
 {
   assert( containerSize > 0);
-  GT_SET2_VALID(set);
+  assert( set != NULL );
 
   BlockVec_initialize((BlockVec*)set, sizeof(Region2));
   if (containerSize > 0)

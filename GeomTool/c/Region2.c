@@ -114,7 +114,7 @@ void Region2_initialize(Region2 * region)
 void Region2_initialize2(Region2 * region, const unsigned int containerSize)
 {
   /* assert( containerSize > 0); - technically, this should be ok */
-  GT_REGION_VALID(region);
+  assert(region != NULL);
 
   BlockVec_initialize((BlockVec*)region, sizeof(SegmentList2));
   if (containerSize > 0)
@@ -161,16 +161,19 @@ unsigned int Region2_appendEmpty(Region2 * region)
 
   return numLists(region)-1;  
 }
-SegmentList2 * Region2_appendEmptyP(Region2 * region)
+SegmentList2 * SegmentList2Set_appendEmptyP(SegmentList2Set * set)
 {
   unsigned int res;
 
-  GT_REGION_VALID(region);
-  GT_SEGLISTSET_VALID(region);
+  GT_SEGLISTSET_VALID(set);
   
-  res = Region2_appendEmpty(region);
-  return &(list(region, res));
-  
+  res = Region2_appendEmpty(set);
+  return &(list(set, res));
+}
+SegmentList2 * Region2_appendEmptyP(Region2 * region)
+{
+    GT_REGION_VALID(region);
+    return SegmentList2Set_appendEmptyP(region);
 }
 void Region2_appendCopySet(Region2 * region, const Region2 * const otherRegion)
 {
@@ -513,7 +516,7 @@ bool SegmentList2Set_makeUnique_destructive(SegmentList2 * inputAll, SegmentList
   contOther = Collision2Cont_create();
   contSelf = Collision2Cont_create();
 
-  accum = Region2_appendEmptyP(output);
+  accum = SegmentList2Set_appendEmptyP(output);
   seg = SegmentList2_lastSeg(inputAll);	/* steal the last segment from the end of the list */
   SegmentList2_pop(inputAll,false);
     
@@ -769,7 +772,7 @@ bool SegmentList2Set_makeUnique_destructive(SegmentList2 * inputAll, SegmentList
 	      if (SegmentList2_numSegs(inputAll) <= 0)
 		break;		/* you just finished up a loop and your all out of segments, bail out */
 
-	      accum = Region2_appendEmptyP(output);
+	      accum = SegmentList2Set_appendEmptyP(output);
 	      seg = SegmentList2_seg(inputAll,SegmentList2_numSegs(inputAll)-1);
 	      SegmentList2_pop(inputAll,false);
  	    }
@@ -813,7 +816,7 @@ bool SegmentList2Set_makeUnique_destructive(SegmentList2 * inputAll, SegmentList
 	  if (SegmentList2_numSegs(inputAll) <= 0)
 	    break; 		/* nothing left and you just finished up an accum, get out */
 
-	  accum = Region2_appendEmptyP(output);
+	  accum = SegmentList2Set_appendEmptyP(output);
 	  seg = SegmentList2_seg(inputAll, SegmentList2_numSegs(inputAll)-1);	/* steal the last segment from the end of the list */
 	  SegmentList2_pop(inputAll,false);
 	}
