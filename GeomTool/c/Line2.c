@@ -249,7 +249,7 @@ void Line2_blindExpand(Line2 * line, const gtfloat delta, Vec2 * expandDir)
   assert(expandDir != NULL);
   assert(delta != 0);
 
-  Line2_vector(line, expandDir);
+  Line2_direction(line, expandDir);
   Point2_rotate90(expandDir, -1);
   trans = *expandDir;
   Point2_scale2(&trans, delta);

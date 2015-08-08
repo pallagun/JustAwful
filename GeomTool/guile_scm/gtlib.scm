@@ -36,6 +36,7 @@
 	    gt-region2-unique
 	    gt-region2-list
 	    gt-region2-numlists
+	    gt-region2-translate
 	    ;; smobSet2 stuff
 	    gt-set2?
 	    gt-make-set2
@@ -48,6 +49,7 @@
 	    gt-set2-intersect
 	    gt-set2-invert
 	    gt-set2-expand
+	    gt-set2-translate
 	    )
 
   #:duplicates (check))

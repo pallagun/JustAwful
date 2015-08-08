@@ -8,6 +8,8 @@
 	    gt-new-set2
 	    gt-line2
 	    gt-arc2
+	    gt-translate
+	    gt-expand
 	    gt-union
 	    gt-union-accum
 	    gt-intersect
@@ -95,6 +97,21 @@
 	    ((gt-set2? accum-gt)
 	     (gt-set2-append accum-gt addit-gt))
 	    (else #f)))))
+(define gt-translate
+  (lambda (A del-x del-y)
+    (let ((A-gt (get-gt-from-thing A)))
+      (cond ((gt-segmentlist2? A-gt)
+	     (gt-segmentlist2-translate A-gt del-x del-y))
+	    ((gt-region2? A-gt)
+	     (gt-region2-translate A-gt del-x del-y))
+	    ((gt-set2? A-gt)
+	     (gt-set2-translate A-gt del-y del-y))
+	    (else #f)))))
+(define gt-expand
+  (lambda (A delta Result)
+    (let ((A-gt (get-gt-from-thing A))
+	  (Result-gt (get-gt-from-thing Result)))
+      (gt-set2-expand A-gt delta Result-gt))))
 
 (define s-test
   (lambda (name)

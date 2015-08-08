@@ -32,7 +32,7 @@
 	  (else #f))))
 
 (define container-force-add
-  (lambda (name type)
+  (lambda (name type-or-gt)
     ;; gt = the gt smob
     ;; color = list of 3 values (R G B)
     ;; visible = #t or #f
@@ -41,11 +41,13 @@
     (set! container-list
 	  (acons name
 		 (acons
-		  "gt" (container-new-gt-by-type type)
+		  "gt" ( if (gt? type-or-gt)
+			    type-or-gt
+			    (container-new-gt-by-type type-or-gt))
 		  (acons
 		   "color" (list 1 1 1)
 		   (acons
-		    "visible" #f
+		    "visible" #t	;maybe not safe?
 		     (acons
 		      "state" "new"
 		      (acons "gl-buffs" '() '())))))

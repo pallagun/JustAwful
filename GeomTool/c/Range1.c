@@ -52,7 +52,9 @@ void Range1_encompass(Range1 * accumulator, const Range1 * const addition)
 }
 void Range1_encompassValue(Range1 * accumulator, const gtfloat addition)
 {
-  GT_RANGE1P_VALID(accumulator);
+  assert(accumulator != NULL);
+  /* can't assert is valid here, could have been "initialized" */
+  /* GT_RANGE1P_VALID(accumulator); */
 
   if (accumulator->Max < addition)
     accumulator->Max = addition;

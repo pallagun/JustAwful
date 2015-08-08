@@ -250,6 +250,16 @@
        (assert-yell (gt-segmentlist2-almostequal (gt-region2-list (gt-set2-region S 0) 0) LResult) "test-union-RSL-1.3")
        )))
 
+
+(define test-expand-SL-1
+  (lambda ()
+    (let ((L1 (factory-make-rectangle 2 1))
+	  (res (gt-make-set2)))
+      (gt-segmentlist2-translate L1 1 0.5)
+      (pk "exp pre" L1)
+      (gt-set2-expand L1 0.5 res)
+      (pk "exp res" res))))
+
 (define run-tests
   (lambda ()
     (newline)
@@ -271,6 +281,8 @@
     (test-intersect-SLSL-6)
 
     (test-union-RSL-1)
+
+    (test-expand-SL-1)
     (pk "tests ok? " tests-ok)))
 
 (run-tests)
