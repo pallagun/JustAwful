@@ -688,7 +688,7 @@ bool SegmentList2Set_makeUnique_destructive(SegmentList2 * inputAll, SegmentList
 	  collision_i = INTERNAL_segListFind(accum, contSelf->pts[idxSelf].aSegment);
 #ifdef DEBUG_REG2_UNMERGE
 	  Serialize_Seg(SEXP, contSelf->pts[idxSelf].aSegment, charBuff, 256);
-	  printf("IR2U: Self: collision pt %.2f, %.2f\n", contSelf->pts[idxSelf].pt.x, contSelf->pts[idxSelf].pt.y);
+	  printf("IR2U: Self: collision pt %.2f, %.2f [idx: %d]\n", contSelf->pts[idxSelf].pt.x, contSelf->pts[idxSelf].pt.y,collision_i);
 	  printf("IR2U: Self: collision A param(%.2f), %s\n", contSelf->pts[idxSelf].aParametric, charBuff);
 	  Serialize_Seg(SEXP, contSelf->pts[idxSelf].bSegment, charBuff, 256);
 	  printf("IR2U: Self: collision B param(%.2f), %s\n", contSelf->pts[idxSelf].bParametric, charBuff);
@@ -727,7 +727,6 @@ bool SegmentList2Set_makeUnique_destructive(SegmentList2 * inputAll, SegmentList
 		  Seg2p_truncateToParametric(&seg, contOther->pts[idxOther].bParametric, GT_EXACTLY_ONE);
 		}
 	    }
-
 	  else	/* (typeSelf == UGBSR_Continuation) */
 	    {
 #ifdef DEBUG_REG2_UNMERGE
@@ -737,17 +736,34 @@ bool SegmentList2Set_makeUnique_destructive(SegmentList2 * inputAll, SegmentList
 	      /* trim whatever piece that you need to off the seg */
 	      if (!GT_ALMOST_EQUAL2(contSelf->pts[idxSelf].bParametric, GT_EXACTLY_ONE))
 		{		/* trim off the end of seg and throw it back */
-		  Seg2p_setParametric(&tempSeg, &seg, contOther->pts[idxOther].bParametric, GT_EXACTLY_ONE);
+		  Seg2p_setParametric(&tempSeg, &seg, contSelf->pts[idxOther].bParametric, GT_EXACTLY_ONE);
+#ifdef DEBUG_REG2_UNMERGE
+		  Serialize_Seg(SEXP, &tempSeg, charBuff, 256);
+		  printf("IR2U: splitWork trash: %s\n", charBuff);
+#endif
 		  SegmentList2_appendCopy(inputAll, &tempSeg, false);
-		  Seg2p_truncateToParametric(&seg, GT_EXACTLY_ZERO, contOther->pts[idxOther].bParametric);
+		  Seg2p_truncateToParametric(&seg, GT_EXACTLY_ZERO, contSelf->pts[idxOther].bParametric);
+#ifdef DEBUG_REG2_UNMERGE
+		  Serialize_Seg(SEXP, &seg, charBuff, 256);
+		  printf("IR2U: splitWork keepr: %s\n", charBuff);
+#endif
 		}
 
 	      /* now figure out if you need to trim anything from accum */
 	      if (!GT_ALMOST_EQUAL2(contSelf->pts[idxSelf].aParametric, GT_EXACTLY_ZERO))
 		{
 		  Seg2p_setParametric(&tempSeg, &(SegmentList2_seg(accum,collision_i)), GT_EXACTLY_ZERO, contSelf->pts[idxSelf].aParametric);
+#ifdef DEBUG_REG2_UNMERGE
+		  Serialize_Seg(SEXP, &tempSeg, charBuff, 256);
+		  printf("IR2U: splitWork trash: %s\n", charBuff);
+#endif
+
 		  SegmentList2_appendCopy(inputAll, &tempSeg, false);
 		  Seg2p_truncateToParametric(&(SegmentList2_seg(accum,collision_i)), contSelf->pts[idxSelf].aParametric, GT_EXACTLY_ONE);
+#ifdef DEBUG_REG2_UNMERGE
+		  Serialize_Seg(SEXP, &(SegmentList2_seg(accum,collision_i)), charBuff, 256);
+		  printf("IR2U: splitWork keepr: %s\n", charBuff);
+#endif
 		}
 	      if (collision_i != 0)
 		{		/* you didn't hit at the first segment, going to have to ditch your formers */

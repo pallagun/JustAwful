@@ -283,11 +283,11 @@ SCM union_Set2(SCM smobA, SCM smobB, SCM smobSet2Destination)
   else /* if(SCM_SMOB_PREDICATE(tag_SegmentList22, smob)) */
     {
       if (SCM_SMOB_PREDICATE(tag_Set2, smobB))
-	success = Set2_unionSSL(set2fromSCM(smobB), segmentlist2fromSCM(smobB), output);
+	success = Set2_unionSSL(set2fromSCM(smobB), segmentlist2fromSCM(smobA), output);
       else if (SCM_SMOB_PREDICATE(tag_Region2, smobB))
 	success = Set2_unionRSL(region2fromSCM(smobB), segmentlist2fromSCM(smobA), output);	  
       else /* if(SCM_SMOB_PREDICATE(tag_SegmentList22, smob)) */
-	success = Set2_unionSLSL(segmentlist2fromSCM(smobA), segmentlist2fromSCM(smobB), output);
+	success = Set2_unionSLSL(segmentlist2fromSCM(smobB), segmentlist2fromSCM(smobA), output);
     }
 
   if (success)
@@ -396,7 +396,7 @@ SCM expand_Set2(SCM smobGt, SCM expansionFloat, SCM smobSet2Destination)
   expansion = scm_to_double(expansionFloat);
   
   if (smobSet2Destination != SCM_UNDEFINED
-      && is_Set2(smobSet2Destination))
+      && SCM_SMOB_PREDICATE(tag_Set2, smobSet2Destination))  /* is_Set2(smobSet2Destination)) */
     {
       hasDestination = SCM_BOOL_T;
       output = set2fromSCM(smobSet2Destination);
@@ -409,8 +409,12 @@ SCM expand_Set2(SCM smobGt, SCM expansionFloat, SCM smobSet2Destination)
   success = false;
   if (SCM_SMOB_PREDICATE(tag_SegmentList2, smobGt))
     success = Set2_expandSL(segmentlist2fromSCM(smobGt), expansion, output);
+  else if (SCM_SMOB_PREDICATE(tag_Region2, smobGt))
+    success = Set2_expandR(region2fromSCM(smobGt), expansion, output);
+  else if (SCM_SMOB_PREDICATE(tag_Set2, smobGt))
+    success = Set2_expandS(set2fromSCM(smobGt), expansion, output);
   else
-    SCM_ASSERT(0, smobGt, 1, "fix this!");
+    SCM_ASSERT(0, smobGt, 1, "unknow smob input type? not a gt?");
 
   if (success)
     {

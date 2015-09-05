@@ -129,20 +129,24 @@ unsigned int Arc2_getApproximationSize(const Arc2 * const arc, const gtfloat max
   /* formula is BufferSize >= 1 + arcradialspan / (2 * arccos(1 - (maxError/radius))) */
   /* so 1-maxError/radius has to be [-1,1] */
   /* therefore maxError/Radius has to be [0,2] */
-  gtfloat error_over_radius;
-  GT_ARC_VALID(arc);
-  if (maxError >= 2*arc->radius)
-    {
-      return 3;
-    }
-  else
-    {
-      if (maxError <= 0)
-	error_over_radius = ( (maxError <= 0)?(GT_ALMOST_ZERO):(maxError) )/arc->radius;
 
-      /* and here it is in all it's terrible gloryN */
-      return ceil( 1 + (Angle_width(&(arc->angle)) / (2 * acos(1 - (error_over_radius)))));      
-    }
+  /* TODO: figure this one out again and make this less terrible */
+  return 3 + ceil(Angle_width(&(arc->angle)));
+  
+  /* gtfloat error_over_radius = 100; */
+  /* GT_ARC_VALID(arc); */
+  /* if (maxError >= 2*arc->radius) */
+  /*   { */
+  /*     return 3; */
+  /*   } */
+  /* else */
+  /*   { */
+  /*     if (maxError <= 0) */
+  /* 	error_over_radius = ( (maxError <= 0)?(GT_ALMOST_ZERO):(maxError) )/arc->radius; */
+
+  /*     /\* and here it is in all it's terrible gloryN *\/ */
+  /*     return ceil( 1 + (Angle_width(&(arc->angle)) / (2 * acos(1 - (error_over_radius)))));       */
+  /*   } */
 }
 bool Arc2_getApproximation(const Arc2 * const arc, Point2 * pointBuffer, const unsigned int bufferSize)
 {

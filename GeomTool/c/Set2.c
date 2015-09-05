@@ -1192,6 +1192,8 @@ bool Set2_expandSL(const SegmentList2 * const segs, const gtfloat expansion, Set
       assert(0); 		/* why are you calling me with this non-normal type?? */
       res = false;
     }
+
+  GT_SET2_VALID(output);
   return res;
 }
 bool Set2_expandR(const Region2 * const region, const gtfloat expansion, Set2 * output)
@@ -1221,6 +1223,7 @@ bool Set2_expandR(const Region2 * const region, const gtfloat expansion, Set2 * 
       Region2_destroy(uniqueSet);
     }
   SegmentList2_destroy(blindExpand);
+  GT_SET2_VALID(output);
   return res;
 }
 bool Set2_expandS(const Set2 * const set, const gtfloat expansion, Set2 * output)
@@ -1250,6 +1253,8 @@ bool Set2_expandS(const Set2 * const set, const gtfloat expansion, Set2 * output
       Region2_destroy(uniqueSet);
     }
   SegmentList2_destroy(blindExpand);
+
+  GT_SET2_VALID(output);
   return res;
 }
 bool Set2_blindExpandToList(const Set2 * const input, const gtfloat growth, SegmentList2 * accum)

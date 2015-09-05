@@ -1528,6 +1528,7 @@ int SegmentList2_getApproximation(const SegmentList2 * const input, const gtfloa
 	    {
 	      assert(seg(input,seg_i).type == ARC);
 	      arcSize = Arc2_getApproximationSize(&(seg(input,seg_i).s.arc), maxError);
+	      assert(arcSize > 0);
 	      if (!Arc2_getApproximation(&(seg(input,seg_i).s.arc), &(buffer[pt_i-1]),arcSize))
 		{
 		  /* TODO: well that threw up, handle this error properly some day */

@@ -16,7 +16,7 @@
   ((lambda (x) (x x))
    (lambda (myself)
      (lambda (A B func)
-       ;; (pk 'iter A B),q
+       ;; (pk 'iter A B)
        (if ( or (equal? A '()) (equal? B '()))
 	   '()
 	   (let ((my-A (car A))

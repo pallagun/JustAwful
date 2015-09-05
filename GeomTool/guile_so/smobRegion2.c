@@ -19,7 +19,7 @@ void init_Region2(void)
   scm_c_define_gsubr("gt-region2-unique", 1, 0, 0, unique_Region2);
   scm_c_define_gsubr("gt-region2-list", 2, 0, 0, list_Region2);
   scm_c_define_gsubr("gt-region2-numlists", 1, 0, 0, numlists_Region2);
-  scm_c_define_gsubr("gt-region2-translate", 2, 0, 0, translate_Region2);
+  scm_c_define_gsubr("gt-region2-translate", 3, 0, 0, translate_Region2);
 }
 int print_Region2(SCM smob, SCM port, scm_print_state *pstate)
 {
