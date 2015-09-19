@@ -1,6 +1,7 @@
 #include "include/Region2.h"
 
 #include "include/Collision2.h"
+#include "include/Util.h"
 #include "stdlib.h" 		/* malloc */
 
 /*
@@ -295,27 +296,29 @@ void Region2_cloneAllSegsToList(const Region2 * const region, SegmentList2 * acc
 }
 bool Region2_blindExpandToList(const Region2 * const region, const gtfloat growth, SegmentList2 * accum)
 {
-  GT_REGION_VALID(region);
-  GT_SEGLIST_VALID1(accum);
+  /* this function DOES NOT CLEAR the accum! */
   unsigned int i;
   SegmentList2 * temp;
   bool res;
 
-  if ((temp = SegmentList2_create()) == NULL)
-    return false;
+  GT_REGION_VALID(region);
+  GT_SEGLIST_VALID1(accum);
+  assert(growth > 0);
 
   res = true;
-  
-  for (i = 0; i < numLists(region) && res; ++i)
+  if (( temp = SegmentList2_create()) != NULL)
     {
-      if (SegmentList2_blindExpansion(&list(region,i), growth, temp) != true)
+      for (i = 0; i < numLists(region) && res; ++i)
 	{
-	  res = false;
-	  SegmentList2_appendCopyList(accum, temp, false);
+	  /* segmentlist2_blindExpand DOES clear accum, so I need a buffer here */
+	  if ((res = SegmentList2_blindExpansion(&list(region,i), growth, temp)))
+	    {
+	      SegmentList2_appendCopyList(accum,temp,false);
+	    }
 	}
-    }
 
-  SegmentList2_destroy(temp);
+      SegmentList2_destroy(temp);
+    }
 
   return res;      
 }
@@ -804,7 +807,10 @@ bool SegmentList2Set_makeUnique_destructive(SegmentList2 * inputAll, SegmentList
 	    {			/* throw it away! */
 	      Seg2_endPoint(seg, &tempEnd);
 	      if (SegmentList2_numSegs(accum) > 0)
-		Seg2_startPoint(SegmentList2_seg(accum,0), &tempStart);
+		{
+		  assert(SegmentList2_numSegs(accum) > 0);
+		  Seg2_startPoint(SegmentList2_seg(accum,0), &tempStart);
+		}
 
 	      if (SegmentList2_numSegs(accum) <= 0 || !Point2_almostEqual2(&tempEnd, &tempStart))
 		{		/* this path isn't closed throw it away and continue*/

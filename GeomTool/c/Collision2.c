@@ -1,5 +1,5 @@
 #include "include/Collision2.h"
-
+#include "include/Util.h"
 /* NOTE: this is my threshold for a collision */
 /* #define GT_COLLISION2_THRESHOLD GT_ALMOST_ZERO */
 /* GT_COLLISION2_CROSS_PARALLEL_THRESHOLD */
@@ -952,7 +952,22 @@ bool Internal_AA(Collision2Container * cont, const Arc2 * const A, const Arc2 * 
 
       if (hitCount != 2 && includeEndToEndPoints)
 	{ 			/* technically speaking, I could have endpoint to end point collisions that I didn't detect, I should find those. */
-	  assert(1 == 0); 	/* uhg, god, write this */
+	  endpointCount = 0;
+	  if (Point2_almostEqual3(&aStart, &bStart, GT_COLLISION2_THRESHOLD) ||
+	      Point2_almostEqual3(&aStart, &bEnd, GT_COLLISION2_THRESHOLD))
+	    {
+	      endpointCount = 1;
+	    }
+	  if (Point2_almostEqual3(&aEnd, &bStart, GT_COLLISION2_THRESHOLD) ||
+	      Point2_almostEqual3(&aEnd, &bEnd, GT_COLLISION2_THRESHOLD))
+	    {
+	      ++endpointCount;
+	    }
+	  if (endpointCount > 0)
+	    {
+	      assert(1 == 0); 	/* well looks like you really do have some intersects, better fix this code! */
+	      hitCount = endpointCount;
+	    }
 	}
       
       return (hitCount > 0);

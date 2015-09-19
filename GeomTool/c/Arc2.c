@@ -1,13 +1,25 @@
 #include "include/Arc2.h"
+#include "include/Util.h"
 
-#define INTERNALE_ARC2_SETANGLE(arc, angStart, angEnd, angRot) { arc->angle.start = angStart; arc->angle.end = angEnd; arc->angle.rot = angRot; }
-
-void Internal_Arc2_setAngle(Arc2 * arc, const gtfloat start, const gtfloat end, const short rotation)
+void Internal_Arc2_setAngle(Arc2 * arc, const gtfloat start, const gtfloat end, const short rotation, const bool makeProper)
 {
-  GT_ARC_VALID(arc);
+  assert(start != end);
+  assert(rotation == 1 || rotation == -1);
+  
   arc->angle.start = start;
   arc->angle.end = end;
   arc->angle.rot = rotation;
+
+  if (makeProper)
+    {
+      if (rotation > 0 && start > end)
+	arc->angle.end += 2 * M_PI;
+      else if (rotation < 0 && end > start)
+	arc->angle.end -= 2 * M_PI;
+    }
+    
+  
+  GT_ARC_VALID(arc);
 }
 void Internal_Arc2_ptAtTheta(const Arc2 * const arc, const gtfloat theta, Point2 * pt)
 {
@@ -41,18 +53,20 @@ void Arc2_set4(Arc2 * arc, const Point2 * const center, const gtfloat radius, co
   
   arc->center = *center;
   arc->radius = radius;
-  Internal_Arc2_setAngle(arc, angle->start, angle->end, angle->rot);
+  Internal_Arc2_setAngle(arc, angle->start, angle->end, angle->rot, true);
   Angle_ensureValid( &(arc->angle) );
 }
 void Arc2_set6(Arc2 * arc, const Point2 * const center, const gtfloat radius, const gtfloat startRadians, const gtfloat endRadians, const short rotation)
 {
-  GT_ARC_VALID(arc);
   assert(center != NULL);
-  
+  assert(startRadians != endRadians);
+  assert(rotation == 1 || rotation == -1);
+  assert(radius > 0);
   arc->center = *center;
   arc->radius = radius;
-  Internal_Arc2_setAngle(arc, startRadians, endRadians, rotation);
+  Internal_Arc2_setAngle(arc, startRadians, endRadians, rotation, true);
   Angle_ensureValid( &(arc->angle) );
+  GT_ARC_VALID(arc);
 }
 void Arc2_setParametric(Arc2 * arc, const Arc2 * const src, const gtfloat min_t, const gtfloat max_t)
 {
@@ -317,4 +331,20 @@ bool Arc2_blindExpand(Arc2 * arc, const gtfloat delta)
   GT_ARC_VALID(arc);
   arc->radius += arc->angle.rot * delta;
   return (arc->radius > 0);
+}
+bool Arc2_ensureValid(const Arc2 * const arc)
+{
+  if (arc == NULL)
+    return false;
+
+  if (! (GT_ANGLE_VALID_INTERNAL(&(arc->angle))) )
+    return false;
+
+  if (Angle_width(&(arc->angle)) <= 0)
+    return false;
+
+  if (Angle_width(&(arc->angle)) > M_PI)
+    return false;
+
+  return true;
 }

@@ -17,21 +17,11 @@ typedef double gtfloat;
 #define GT_EXACTLY_ONE (gtfloat)1.0
 #define GT_EXACTLY_ZERO (gtfloat)0.0
 
-#define GT_ALMOST_EQUAL3(A,B,DELTA) ( -DELTA < A-B && A-B < DELTA )
-#define GT_ALMOST_EQUAL2(A,B) ( -GT_ALMOST_ZERO < A-B && A-B < GT_ALMOST_ZERO )
-
 #ifndef M_PI
  #define M_PI (gtfloat)3.141592653589793238462643383279502884197169399375105820974944592
 #endif
 
-/* TODO: are while loops in #define statments bad? I think they might be. */
-#define normalizeZeroTo2Pi(val) { while((val)>2*M_PI){(val)-=2*M_PI;}; while((val) < 0){(val)+=2*M_PI;}; }
-
- /* TODO: isn't this in a library someplace */
-#define deg2rad(val) (val)*M_PI/180.0
-#define rad2deg(val) (val)*180.0/M_PI
-#define sign(val) (((val) >= 0) ? (1) : (-1))
-
+#define EOM_DEATH { printf("EOM?\n"); exit(1); }
 
 #ifndef DB_PRINTF
  #ifdef NDEBUG

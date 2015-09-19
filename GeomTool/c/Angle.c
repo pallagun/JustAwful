@@ -2,6 +2,7 @@
 
 #include <stdlib.h>  /* for NULL */
 #include <assert.h>
+#include "include/Util.h"
 /* should I be using a fmod here instead of these while loops? */
 
 gtfloat Angle_span(const Angle * const angle)

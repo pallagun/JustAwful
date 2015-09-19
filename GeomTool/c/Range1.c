@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include "include/Util.h"
 
 void Range1_set3(Range1 * range, const gtfloat Min, const gtfloat Max)
 {

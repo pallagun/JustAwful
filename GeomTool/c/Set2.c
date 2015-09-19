@@ -1243,7 +1243,7 @@ bool Set2_expandS(const Set2 * const set, const gtfloat expansion, Set2 * output
   assert(myType == BOUNDED || myType == UNBOUNDED);
   
   blindExpand = SegmentList2_create();
-  if (Set2_blindExpandToList(set, expansion, blindExpand) == false)
+  if (Set2_blindExpandToList(set, expansion, blindExpand))
     {
       uniqueSet = Region2_create();
       if (SegmentList2Set_makeUnique_destructive(blindExpand, uniqueSet, true))

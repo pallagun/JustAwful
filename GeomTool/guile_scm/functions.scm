@@ -35,10 +35,15 @@
 
 (define get-gt-from-thing
   (lambda (thing)
-    (cond ((gt? thing) thing)  	                     ;is it already an gt?
- 	  ((list? thing) (assoc-ref thing "gt"))            ;maybe its an alist with gt in it
- 	  ((not (eq? thing #f)) (container-get thing "gt")) ;maybe its a name of an obj
-	  (#t #f))))					     ;ehh, give up
+    ;; (pk "get-gt-from thing" thing)
+    (cond ((gt? thing)
+	   thing)  	                     ;is it already an gt?
+ 	  ((list? thing)
+	   (assoc-ref thing "gt"))            ;maybe its an alist with gt in it
+ 	  ((not (eq? thing #f))
+	   (container-get thing "gt")) ;maybe its a name of an obj
+	  (#t
+	   #f))))					     ;ehh, give up
 
 (define gt-union-accum
   (lambda (accum input)
@@ -46,7 +51,7 @@
 	  (input-gt (get-gt-from-thing input))
 	  (temp-gt (gt-make-set2)))
       (cond ((gt-set2? accum)
-	     (gt-set2-union accum-gt, input-gt temp-gt)
+	     (gt-set2-union accum-gt input-gt temp-gt)
 	     (gt-set2-clear accum-gt)
 	     (gt-set2-append accum-gt temp-gt))
 	    (else #f)))))
@@ -57,7 +62,7 @@
 	  (input-gt (get-gt-from-thing input))
 	  (temp-gt (gt-make-set2)))
       (cond ((gt-set2? accum)
-	     (gt-set2-intersect accum-gt, input-gt temp-gt)
+	     (gt-set2-intersect accum-gt input-gt temp-gt)
 	     (gt-set2-clear accum-gt)
 	     (gt-set2-append accum-gt temp-gt))
 	    (else #f)))))
@@ -105,15 +110,17 @@
 	    ((gt-region2? A-gt)
 	     (gt-region2-translate A-gt del-x del-y))
 	    ((gt-set2? A-gt)
-	     (gt-set2-translate A-gt del-y del-y))
+	     (gt-set2-translate A-gt del-x del-y))
 	    (else #f)))))
 (define gt-expand
   (lambda (A delta Result)
     (let ((A-gt (get-gt-from-thing A))
 	  (Result-gt (get-gt-from-thing Result)))
+      ;; (pk "gt-expand-input" A-gt)
+      ;; (pk "gt-expand-result" Result-gt)
       (gt-set2-expand A-gt delta Result-gt))))
 
-(define s-test
-  (lambda (name)
-    (get-vertex-data name)))
+;; (define s-test
+;;   (lambda (name)
+;;     (get-vertex-data name)))
 

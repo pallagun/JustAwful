@@ -3,9 +3,11 @@
 #include <stdlib.h> 		/* malloc, free */
 #include <string.h>		/* memcpy */
 #include <assert.h> 		/* assert */
+#include "include/Util.h"
 #include "include/Collision2.h" /* collision2continaer */
 #include "include/Range1Set.h"
-#include "include/Containment.h" 
+#include "include/Containment.h"
+
 
 #define GT_SEGLIST_DO_EOMFAIL { puts("EOM\n"); exit(1); }
 #define GT_SEGLIST_DO_TERMINAL { puts("SEGLIST ERR\n"); exit(1); }
@@ -1403,7 +1405,7 @@ bool SegmentList2_blindExpansion(const SegmentList2 * const input, const gtfloat
   unsigned int i, k, next_i;	/* i = input segment counter, k = output segment counter */
   Vec2 myEndExpandDir, nextStartExpandDir;
   Point2 myEnd;
-  gtfloat dirCross, absGrowth;
+  gtfloat dirCross, absGrowth, innerThetaStart, innerThetaEnd;
 
 #ifndef NDEBUG
   bool isCont, isClosed;
@@ -1421,7 +1423,7 @@ bool SegmentList2_blindExpansion(const SegmentList2 * const input, const gtfloat
 
   absGrowth = ( (growth < 0) ? (-growth) : (growth) );
   
-  SegmentList2_reallocate(output, input->segments.numItems*2); /* at most double input's size (entirely covex shape) */
+  SegmentList2_reallocate(output, numSegs(input)*2); /* at most double input's size (entirely covex shape) */
   SegmentList2_clear(output); 
   k = 0;
 
@@ -1439,7 +1441,8 @@ bool SegmentList2_blindExpansion(const SegmentList2 * const input, const gtfloat
       else
 	{
       	  assert(seg(output,k).type == ARC);
-	  assert(seg(output,k).s.arc.angle.rot != 0);
+	  GT_ARC_VALID(&(seg(output,k).s.arc));
+	  /* assert(seg(output,k).s.arc.angle.rot != 0); */
 	  if (Arc2_blindExpand(&(seg(output,k).s.arc), growth))
 	    {
 	      Arc2_endDirection(&(seg(output,k).s.arc), &myEndExpandDir); /* expansion was valid, collect end direction */
@@ -1448,6 +1451,8 @@ bool SegmentList2_blindExpansion(const SegmentList2 * const input, const gtfloat
 	    }
 	  else
 	    --k;		/* expansion was not valid */
+
+	  GT_ARC_VALID(&(seg(output,k).s.arc));
 	}
       
       /* and now, check if you need to stitch to the next line */
@@ -1462,22 +1467,38 @@ bool SegmentList2_blindExpansion(const SegmentList2 * const input, const gtfloat
       if (dirCross != 0 && 
 	  (growth > 0) == (dirCross > 0))
 	{			/* confusing, but I think correct */
+
 	  /* center will be at input->segments[i] end point */
 	  /* start angle is defined by myEndExpandDir, end angle defined by nextStartExpandDir */
 	  /* the radius will be the growth */
+	  
+	  
 	  if (growth < 0)
 	    {			/* if your shrinking, you need to remember to flip these */
 	      Point2_invert1(&myEndExpandDir);
 	      Point2_invert1(&nextStartExpandDir);
 	    }
-
-	  seg(output,++k).type = ARC;
-	  Arc2_set6(&(seg(output,k).s.arc), 
-		    &myEnd,
-		    absGrowth,
-		    Point2_theta(&myEndExpandDir),
-		    Point2_theta(&nextStartExpandDir),
-		    ( (growth > 0) ? ( 1 ) : ( -1 ) ));		    
+	  
+	  innerThetaStart = Point2_theta(&myEndExpandDir);
+	  innerThetaEnd = Point2_theta(&nextStartExpandDir);
+	  normalizeZeroTo2Pi(innerThetaStart);
+	  normalizeZeroTo2Pi(innerThetaEnd);
+	  
+	  /* note REALLY, I should be seeing if the start and end points are close, not the angles
+	     but for now I guess this is it */
+	  if (innerThetaStart != innerThetaEnd &&
+	      !gt_almost_equalrad2(innerThetaStart, innerThetaEnd))
+	    {
+	      seg(output,++k).type = ARC;
+	      Arc2_set6(&(seg(output,k).s.arc), 
+			&myEnd,
+			absGrowth,
+			innerThetaStart,
+			innerThetaEnd,
+			( (growth > 0) ? ( 1 ) : ( -1 ) ));
+	      
+	      GT_ARC_VALID(&(seg(output,k).s.arc));
+	    }
 	}
       ++k;
     }
