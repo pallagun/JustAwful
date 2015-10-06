@@ -1,7 +1,7 @@
 #ifndef __GT_BLOCKVEC_H__
 #define __GT_BLOCKVEC_H__
 
-/* the worst possible <std::vector> ever seen by man */
+/* the worst possible <std::vector> ever seen */
 typedef struct BlockVec
 {
   void * item;

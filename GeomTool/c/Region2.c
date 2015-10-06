@@ -10,6 +10,7 @@
 
 
 /* #define DEBUG_REG2_UNMERGE 1 */
+/* #define DEBUG_REG2_GETBEST 1 */
 #define GT_REGION_OVERSIZE 4
 #define GT_REGION_DO_EOMFAIL { puts("EOM"); exit(1); }
 
@@ -383,8 +384,19 @@ bool INTERNAL_isRight(const gtfloat startCross, const gtfloat startDot, const gt
       return (endCross < startCross);
     }
 }
+
+#ifdef DEBUG_REG2_GETBEST
+#include <stdio.h> 		/* printf */
+#include "include/Serializer.h"
+#endif
+
+
 unmergeGetBestSegResult INTERNALRegion2_unmerge_getBestSegment(const Collision2Container * const cont, unsigned int * bestIdx)
 {
+#ifdef DEBUG_REG2_GETBEST
+  char charBuff[256];
+#endif
+  
   unsigned int i;
   gtfloat lowParametric, lowCross, lowDot, myCross, myDot;
   Vec2 bDir, aDir;
@@ -401,15 +413,22 @@ unmergeGetBestSegResult INTERNALRegion2_unmerge_getBestSegment(const Collision2C
     {
       if ( GT_ALMOST_EQUAL2(cont->pts[i].aParametric, GT_EXACTLY_ONE) )
 	continue; 		/* even if I picked this segment, I couldn't go anywhere with it */
-
+      
       if ( GT_ALMOST_EQUAL2(cont->pts[i].bParametric, GT_EXACTLY_ZERO) )
 	continue;		/* TODO: validate this: this would be more of a restart than anything else */
-
+      
       Seg2p_parametricDirection(cont->pts[i].aSegment, cont->pts[i].aParametric, &aDir);
       Seg2p_parametricDirection(cont->pts[i].bSegment, cont->pts[i].bParametric, &bDir);
       myCross = Point2_cross(&bDir, &aDir);
       myDot = Point2_dot(&bDir, &aDir);
-      
+
+#ifdef DEBUG_REG2_GETBEST
+      Serialize_Seg(SEXP, cont->pts[i].aSegment, charBuff, 256);
+      printf("GBEST: #%d [t=%f]=> %s, X(%.15f) .(%.15f)\n", i, cont->pts[i].aParametric, charBuff, myCross, myDot);
+      printf("GBEST: - - adir(%.15f,%.15f) bdir(%f,%f)\n", aDir.x, aDir.y, bDir.x, bDir.y);
+#endif
+
+      /* evaluate each hit */
       if ( cont->pts[i].bParametric <= lowParametric) /* do I even care about this particular hit? */
 	{
 	  if ( GT_ALMOST_EQUAL2(cont->pts[i].bParametric, GT_EXACTLY_ONE) )
@@ -421,6 +440,9 @@ unmergeGetBestSegResult INTERNALRegion2_unmerge_getBestSegment(const Collision2C
 		  lowDot = myDot;
 		  *bestIdx = i;
 		  res = UGBSR_Continuation;
+#ifdef DEBUG_REG2_GETBEST
+		  printf("GBEST: picking #%d on case 1\n",i);
+#endif
 		}
 	    }
 	  else if ( myCross < 0 && res != UGBSR_Reset )
@@ -428,11 +450,30 @@ unmergeGetBestSegResult INTERNALRegion2_unmerge_getBestSegment(const Collision2C
 	      if ( cont->pts[i].bParametric < lowParametric /* must be earlier */
 		   || INTERNAL_isRight(lowCross, lowDot, myCross, myDot)) /* or "more right" */
 		{
+		  /* not so fast, this could be an arc that has a myCross == -0,0 but 
+		     actually ends up going left (into the shape) not right. 
+		     If (b is an arc, aParametric != 1 and b curves in, NO BEST */
+		  if (cont->pts[i].aSegment->type == ARC && /* is this an arc? */
+		      GT_ALMOST_EQUAL2(myCross, GT_EXACTLY_ZERO) && /* is this really close to parallel? */
+		      !GT_ALMOST_EQUAL2(cont->pts[i].bParametric, GT_EXACTLY_ONE)) /* NOT at the end */
+		    {
+		      /* ok, potentially we have a trick ARC, check del direction to make sure it's really going out */
+		      Arc2_parametricDelDirection(&(cont->pts[i].aSegment->s.arc), cont->pts[i].aParametric, &aDir);
+		      if (Point2_cross(&bDir,&aDir) > 0)
+			{
+			  /* Can't trick me! */
+			  continue;
+			}		      
+		    }
+		      
 		  lowParametric = cont->pts[i].bParametric;
 		  lowCross = myCross;
 		  lowDot = myDot;
 		  *bestIdx = i;
 		  res = UGBSR_Continuation;
+#ifdef DEBUG_REG2_GETBEST
+		  printf("GBEST: picking #%d on case 2\n",i);
+#endif
 		}
 	    }
 	  else if ( myCross > 0 )
@@ -445,11 +486,18 @@ unmergeGetBestSegResult INTERNALRegion2_unmerge_getBestSegment(const Collision2C
 		  lowDot = myDot;
 		  *bestIdx = i;
 		  res = UGBSR_Reset;
+#ifdef DEBUG_REG2_GETBEST
+		  printf("GBEST: picking #%d on case 3\n",i);
+#endif
 		}
 	    }
 	}
     }
 
+#ifdef DEBUG_REG2_GETBEST
+  printf("GBEST: picking %d of %d\n", *bestIdx, cont->numPts);
+#endif
+  
   return res;
 }
 unsigned int INTERNAL_segListFind(const SegmentList2 * const list, const Segment2 * seg)
@@ -522,7 +570,9 @@ bool SegmentList2Set_makeUnique_destructive(SegmentList2 * inputAll, SegmentList
   accum = SegmentList2Set_appendEmptyP(output);
   seg = SegmentList2_lastSeg(inputAll);	/* steal the last segment from the end of the list */
   SegmentList2_pop(inputAll,false);
-    
+#ifdef DEBUG_REG2_UNMERGE
+  printf("\nIR2U: function start\n");
+#endif
   while (!done || SegmentList2_numSegs(inputAll) > 0) /* (SegmentList2_numSegs(all) > 0) */ /* for (i = all->numSegments - 1; i >= 0; --i) */
     {
   
@@ -603,24 +653,28 @@ bool SegmentList2Set_makeUnique_destructive(SegmentList2 * inputAll, SegmentList
 		  SegmentList2_clear(accum);
 		}
 
-	      /* the one you hit becomes the first seg on the accumulator, just the first part of it */	      
-	      if (!GT_ALMOST_EQUAL2(contOther->pts[idxOther].aParametric, GT_EXACTLY_ONE))
+	      /* if you hit the other piece at its start, you shouldn't be futzing with it, it's fine */
+	      if (!GT_ALMOST_EQUAL2(contOther->pts[idxOther].aParametric, GT_EXACTLY_ZERO))
 		{
-		  Seg2p_setParametric(&tempSeg, &(SegmentList2_seg(inputAll,collision_i)), contOther->pts[idxOther].aParametric, GT_EXACTLY_ONE);
+		  /* the one you hit becomes the first seg on the accumulator, just the first part of it */	      
+		  if (!GT_ALMOST_EQUAL2(contOther->pts[idxOther].aParametric, GT_EXACTLY_ONE))
+		    {
+		      Seg2p_setParametric(&tempSeg, &(SegmentList2_seg(inputAll,collision_i)), contOther->pts[idxOther].aParametric, GT_EXACTLY_ONE);
 #ifdef DEBUG_REG2_UNMERGE
-		  Serialize_Seg(SEXP, &tempSeg, charBuff, 256);
-		  printf("IR2U: splitA trash: %s\n", charBuff);
+		      Serialize_Seg(SEXP, &tempSeg, charBuff, 256);
+		      printf("IR2U: splitA trash: %s\n", charBuff);
 #endif
-		  SegmentList2_appendCopy(inputAll, &tempSeg, false);
-		  Seg2p_truncateToParametric(&(SegmentList2_seg(inputAll,collision_i)), GT_EXACTLY_ZERO, contOther->pts[idxOther].aParametric);
+		      SegmentList2_appendCopy(inputAll, &tempSeg, false);
+		      Seg2p_truncateToParametric(&(SegmentList2_seg(inputAll,collision_i)), GT_EXACTLY_ZERO, contOther->pts[idxOther].aParametric);
 #ifdef DEBUG_REG2_UNMERGE
-		  Serialize_Seg(SEXP, &SegmentList2_seg(inputAll, collision_i), charBuff, 256);
-		  printf("IR2U: splitA keepr: %s\n", charBuff);
+		      Serialize_Seg(SEXP, &SegmentList2_seg(inputAll, collision_i), charBuff, 256);
+		      printf("IR2U: splitA keepr: %s\n", charBuff);
 #endif
+		    }
+		  
+		  SegmentList2_appendCopy(accum, &(SegmentList2_seg(inputAll,collision_i)), false);
+		  SegmentList2_remove(inputAll, collision_i, false);
 		}
-
-	      SegmentList2_appendCopy(accum, &(SegmentList2_seg(inputAll,collision_i)), false);
-	      SegmentList2_remove(inputAll, collision_i, false);
 
 	      /* now the segment you were testing with, I just need the last part of that to remain the segment */
 	      if (!GT_ALMOST_EQUAL2(contOther->pts[idxOther].bParametric, GT_EXACTLY_ZERO))

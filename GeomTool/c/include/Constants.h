@@ -1,9 +1,11 @@
 #ifndef __GT_GEOMCONSTANTS_H__
 #define __GT_GEOMCONSTANTS_H__ 1
 
+/* I don't know if I'm going to want to change this some day, so may as well typedef it */
 typedef double gtfloat;
 
- /* points this far apart are considered "the same" */
+/* points this far apart are considered "the same" */
+/* but to be fair, I use it for a lot of other stuff to */
 #define GT_ALMOST_ZERO (gtfloat)0.0000005
 
 /* This is a really big number, but still something logical */
@@ -23,14 +25,16 @@ typedef double gtfloat;
 
 #define EOM_DEATH { printf("EOM?\n"); exit(1); }
 
-#ifndef DB_PRINTF
- #ifdef NDEBUG
-  #define DB_PRINTF (void(0))
- #else
-  #include <stdio.h>
-  #define DB_PRINTF(STUFF) printf STUFF
- #endif
+#ifndef DEBUG
+# ifdef NDEBUG
+#  define DEBUG 0
+# else
+#  define DEBUG 1
+# endif
 #endif
+
+#define DB_PRINTF(args...) \
+  do { if (!DEBUG) fprintf(stderr, args); } while (0)
 
 #ifndef DB_RUN
  #ifdef NDEBUG

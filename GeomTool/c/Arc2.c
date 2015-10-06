@@ -70,8 +70,7 @@ void Arc2_set6(Arc2 * arc, const Point2 * const center, const gtfloat radius, co
 }
 void Arc2_setParametric(Arc2 * arc, const Arc2 * const src, const gtfloat min_t, const gtfloat max_t)
 {
-  GT_ARC_VALID(arc);
-  assert(src != NULL);
+  GT_ARC_VALID(src);
 
   arc->center = src->center;
   arc->radius = src->radius;
@@ -234,7 +233,8 @@ void Arc2_parametricDirection(const Arc2 * const arc, const gtfloat coordinate, 
   GT_ARC_VALID(arc);
   assert(dir != NULL);
 
-  theta = Angle_getParametricCoord( &(arc->angle), coordinate);
+  //  theta = Angle_getParametricCoord( &(arc->angle), coordinate);
+  theta = Angle_getParametricAngle(&(arc->angle), coordinate);
   Internal_Arc2_dirAtTheta(theta, arc->angle.rot,  dir);
 }
 void Arc2_startDelDirection(const Arc2 * const arc, Vec2 * dir)

@@ -10,7 +10,7 @@ typedef struct Angle
   short rot; 			/* +1 = CCW, -1 = CW, else invalid ... TODO: this should be a bool/enum?... */
 } Angle;
 
-#define GT_ANGLE_VALID_INTERNAL(A) ((A) != NULL) && (((A)->rot == 1 && (A)->end > (A)->start) || ((A)->rot == -1 && (A)->end < (A)->start))
+#define GT_ANGLE_VALID_INTERNAL(A) (((A) != NULL) && (((A)->rot == 1 && (A)->end > (A)->start) || ((A)->rot == -1 && (A)->end < (A)->start)))
 #define GT_ANGLE_VALID(A) assert(GT_ANGLE_VALID_INTERNAL(A))
 
 gtfloat Angle_getParametricCoord(const Angle * const angle, const gtfloat radians);

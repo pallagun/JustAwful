@@ -11,11 +11,12 @@
  #include <stdio.h>
 #endif
 
-typedef struct Point2
+struct Point2
 {
   gtfloat x,y;
-} Point2;
+};
 
+typedef struct Point2 Point2;
 typedef Point2 Vec2; 		/* also this. */
 
 
@@ -24,9 +25,9 @@ void Point2_debug(const Point2 * const pt);
 #endif
 
 void Point2_set3(Point2 * pt, const gtfloat x, const gtfloat y);
-void Point2_add3(Point2 * pt, const Point2 * const A, const Point2 * const B);
+void Point2_add3(Point2 * accumulator, const Point2 * const A, const Point2 * const B);
 void Point2_add2(Point2 * accumulator, const Point2 * const addition);
-void Point2_sub3(Point2 * pt, const Point2 * const A, const Point2 * const B);
+void Point2_sub3(Point2 * accumulator, const Point2 * const A, const Point2 * const B);
 void Point2_sub2(Point2 * accumulator, const Point2 * const subtraction);
 void Point2_scale2(Point2 * pt, const gtfloat scale);
 void Point2_scale3(Point2 * pt, const Point2 * const input, const gtfloat scale);
@@ -39,7 +40,7 @@ void Point2_rotate90(Point2 * pt, const int zSign);
 gtfloat Point2_cross(const Point2 * const A, const Point2 * const B);
 gtfloat Point2_dot(const Point2 * const A, const Point2 * const B);
 
-gtfloat Point2_magsquared(const Point2 * const pt);
+gtfloat Point2_magSquared(const Point2 * const pt);
 gtfloat Point2_mag(const Point2 * const pt);
 gtfloat Point2_distance(const Point2 * const A, const Point2 * const B);
 void Point2_normalize(Point2 * pt);

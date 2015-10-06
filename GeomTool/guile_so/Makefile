@@ -1,6 +1,6 @@
 CC=gcc
 GUILEFLAGS=`guile-config compile`
-CFLAGS= -fPIC -pg -Wall --std=c90 -O0 -fPIC -gdwarf-2 -g3 -ggdb3 --coverage -Wall --std=c90 -O0 -I ../c/include
+CFLAGS= -fPIC -pg -Wall --std=c99 -O0 -gdwarf-2 -g3 -ggdb3 --coverage -I ../c/include
 LIBS=-lm
 GUILELIBS=`guile-config link`
 SNARFOPTS=$(CFLAGS) $(GUILEFLAGS)

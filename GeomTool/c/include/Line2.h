@@ -42,7 +42,7 @@ bool Line2_almostEqualReverseDirectional2(const Line2 * const A, const Line2 * c
 void Line2_translate(Line2 * line, const Vec2 * const delta);
 void Line2_scaleOrigin(Line2 * line, const gtfloat alpha);
 void Line2_flip1(Line2 * line);
-void Line2_flip2(const Line2 * const src, Line2 * dest);
+void Line2_flip2(const Line2 * const src, Line2 * dest); /* I think this needs to have argument order flipped */
 void Line2_truncateToParametric(Line2 * line, const gtfloat min_t, const gtfloat max_t);
 void Line2_blindExpand(Line2 * line, const gtfloat delta, Vec2 * expandDir);
 

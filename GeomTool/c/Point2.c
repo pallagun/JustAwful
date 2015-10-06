@@ -1,6 +1,7 @@
 #include "include/Point2.h"
 
 #ifndef NDEBUG
+#include <stdio.h>		/* printf() */
 void Point2_debug(const Point2 * const pt)
 {
   printf("(%.4f,%.4f)",pt->x,pt->y);
@@ -97,7 +98,7 @@ gtfloat Point2_theta(const Point2 * const pt)
 
   return atan2(pt->y,pt->x);
 }
-gtfloat Point2_magsquared(const Point2 * const pt)
+gtfloat Point2_magSquared(const Point2 * const pt)
 {
   assert(pt != NULL);
 
@@ -107,7 +108,7 @@ gtfloat Point2_mag(const Point2 * const pt)
 {
   assert(pt != NULL);
 
-  return sqrt( (pt->x*pt->x)+(pt->y*pt->y) );
+  return sqrt( Point2_magSquared(pt) );
 }
 gtfloat Point2_distance(const Point2 * const A, const Point2 * const B)
 {

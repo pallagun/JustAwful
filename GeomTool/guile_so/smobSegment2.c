@@ -5,7 +5,7 @@ scm_t_bits tag_Segment2;
 
 void init_Segment2(void)
 {
-  DB_PRINTF(("\ninit_Segment2()\n\n"));
+  DB_PRINTF("\ninit_Segment2()\n\n");
 
   tag_Segment2 = scm_make_smob_type("gtSegment2", sizeof(Segment2));
   scm_set_smob_mark (tag_Segment2, mark_Segment2);
@@ -31,7 +31,7 @@ int print_Segment2(SCM smob, SCM port, scm_print_state * pstate)
 }
 SCM mark_Segment2(SCM smob)
 {
-  DB_PRINTF(("mark_Segment2\n"));
+  DB_PRINTF("mark_Segment2\n");
   return SCM_BOOL_F;
 }
 size_t free_Segment2(SCM smob)
@@ -41,7 +41,7 @@ size_t free_Segment2(SCM smob)
   scm_assert_smob_type(tag_Segment2, smob);
   seg = (Segment2 *)SCM_SMOB_DATA(smob);
   
-  DB_PRINTF(("free_Segment2\n"));
+  DB_PRINTF("free_Segment2\n");
   free(seg);
   return (0);
 }
@@ -57,7 +57,7 @@ SCM make_Segment2_line(SCM X1, SCM Y1, SCM X2, SCM Y2)
   SCM smob;
   Segment2 * seg;
 
-  DB_PRINTF(("make_Segment2_line\n"));
+  DB_PRINTF("make_Segment2_line\n");
   
   seg = malloc(sizeof(Segment2));
 
@@ -75,7 +75,7 @@ SCM make_Segment2_arc(SCM ROT, SCM X, SCM Y, SCM Radius, SCM startTheta, SCM end
   SCM smob;
   Segment2 * seg;
   
-  DB_PRINTF(("make_Segment2_arc\n"));
+  DB_PRINTF("make_Segment2_arc\n");
 
   seg = malloc(sizeof(Segment2));
   seg->type = ARC;
